@@ -26,9 +26,8 @@ int verifyLookups(Directory dir, [Iterable<String>? segments]) {
   final names =
       segments?.toList() ??
       [
-        // a link to a segment counts, as it does when the engine opens it
         for (final e in dir.listSync())
-          if (e.path.endsWith('.rd5') && FileSystemEntity.isFileSync(e.path)) e.uri.pathSegments.last,
+          if (e is File && e.path.endsWith('.rd5')) e.uri.pathSegments.last,
       ];
   final buffers = DataBuffers();
   for (final name in names) {
