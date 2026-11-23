@@ -14,6 +14,38 @@ golden/gen.sh        # only to regenerate golden/data (needs Java and gh)
 
 The tests also read the tiles and profiles of the release named in `golden/data/INPUT`; the first run downloads them with `gh` into `golden/.build/input`.
 
+## Use
+
+```dart
+import 'dart:io';
+
+import 'package:brouter/brouter.dart';
+
+void main() {
+  // The rd5 segments, lookups.dat and the .brf profiles, in one directory.
+  final dir = Directory('segments');
+  verifyLookups(dir); // throws if a segment does not match lookups.dat
+
+  OsmNodeNamed point(String name, double lon, double lat) => OsmNodeNamed()
+    ..name = name
+    ..ilon = ((lon + 180) * 1e6 + 0.5).toInt()
+    ..ilat = ((lat + 90) * 1e6 + 0.5).toInt();
+
+  final rc = RoutingContext()..localFunction = '${dir.path}/hiking-mountain.brf';
+  final engine = RoutingEngine(dir, [point('from', 121.5418, 25.1660), point('to', 121.5486, 25.1713)], rc)
+    ..doRun(15000); // milliseconds; 0 or nothing for no limit
+  final error = engine.getErrorMessage();
+  if (error != null) {
+    print(error); // for example "from-position not mapped in existing datafile"
+    return;
+  }
+  final track = engine.getFoundTrack()!;
+  print('${track.distance} m, ${track.ascend} m up, ${track.nodes.length} points');
+}
+```
+
+The engine works synchronously; run it in an isolate of your own. `package:brouter/brouter.dart` is the public library; everything under `lib/src` may change.
+
 Pure Dart, no Flutter dependency. Android, iOS and macOS; not the web (the decoder needs 64-bit integer bit operations). Each file under `lib/src` names the Java class it was ported from.
 
 | Layer | Java modules | Dart | Status |
