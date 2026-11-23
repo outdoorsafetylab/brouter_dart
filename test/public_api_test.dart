@@ -66,6 +66,26 @@ void main() {
       expect(() => verifyLookups(tmp, ['E125_N25.rd5']), throwsA(isA<FileSystemException>()));
     });
 
+    test('closes what it opened when a check fails', () {
+      // lsof lists the files this process has open (macOS and Linux).
+      ProcessResult openFiles() => Process.runSync('lsof', ['-p', '$pid']);
+      try {
+        openFiles();
+      } on ProcessException {
+        return markTestSkipped('no lsof');
+      }
+      withLookups(lookups.readAsStringSync());
+      File(
+        '${tmp.path}/broken.rd5',
+      ).writeAsBytesSync(File('${segments.path}/E120_N25.rd5').readAsBytesSync().sublist(0, 4096));
+      for (var i = 0; i < 20; i++) {
+        expect(() => verifyLookups(tmp, ['broken.rd5']), throwsA(isA<DataFileException>()));
+      }
+      final listing = openFiles().stdout as String;
+      expect(listing, isNotEmpty);
+      expect(listing, isNot(contains('broken.rd5')));
+    });
+
     test('refuses a segment whose header does not read', () {
       withLookups(lookups.readAsStringSync());
       File(
