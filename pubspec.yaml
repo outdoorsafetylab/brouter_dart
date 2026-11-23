@@ -1,0 +1,11 @@
+name: brouter
+description: BRouter's routing engine (v1.7.10) ported to Dart, for offline routes on the phone.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.0

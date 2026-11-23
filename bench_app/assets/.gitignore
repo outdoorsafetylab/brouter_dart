@@ -1,0 +1,3 @@
+# copied by prepare.sh from golden/: rd5, lookups, profiles, routes table
+*
+!.gitignore

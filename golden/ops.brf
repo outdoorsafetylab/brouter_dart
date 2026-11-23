@@ -1,0 +1,28 @@
+# Layer 2 extra (FORMAT.md): the operators hiking-mountain and trekking do
+# not use (sub, divide, min, max, xor, not, equal, v:), run on every golden
+# way and node description by `Golden ops`.
+---context:global
+assign base 0.7
+assign k = 3
+---context:way
+assign ms v:maxspeed
+assign lanes v:lanes
+assign hw switch highway=track 1.1 switch highway=path 2.3 switch highway=residential 0.9 0.37
+assign costfactor divide hw k
+assign turncost sub hw base
+assign uphillcostfactor divide k hw
+assign downhillcostfactor sub base hw
+assign initialcost if lesser ms 45 then multiply ms 1.3 else 7
+assign nodeaccessgranted xor reversedirection=yes highway=track
+assign initialclassifier not equal ms 50
+assign trafficsourcedensity min ms hw
+assign istrafficbackbone max ms hw
+assign priorityclassifier ms
+assign classifiermask divide lanes 3
+assign maxspeed divide 1 3
+assign uphillcost sub divide ms 7 lanes
+assign downhillcost divide ms 7
+assign uphillcutoff greater ms 30
+assign downhillcutoff or lesser lanes 2 and highway=path not reversedirection=yes
+---context:node
+assign initialcost sub 1 divide 1 3

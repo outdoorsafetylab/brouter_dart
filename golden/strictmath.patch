@@ -1,0 +1,100 @@
+diff --git a/brouter-core/src/main/java/btools/router/KinematicNoCostPath.java b/brouter-core/src/main/java/btools/router/KinematicNoCostPath.java
+index e2d3d3f..7bdfa88 100644
+--- a/brouter-core/src/main/java/btools/router/KinematicNoCostPath.java
++++ b/brouter-core/src/main/java/btools/router/KinematicNoCostPath.java
+@@ -53,7 +53,7 @@ final class KinematicNoCostPath extends OsmPath {
+ 
+         double curveSpeed = aa > 10. ? 200. / aa : 20.;
+         double distanceTime = dist / curveSpeed;
+-        double decayFactor = Math.exp(-distanceTime / km.turnAngleDecayTime);
++        double decayFactor = StrictMath.exp(-distanceTime / km.turnAngleDecayTime);
+         floatingAngleLeft = (float) (floatingAngleLeft * decayFactor);
+         floatingAngleRight = (float) (floatingAngleRight * decayFactor);
+ 
+diff --git a/brouter-core/src/main/java/btools/router/KinematicPath.java b/brouter-core/src/main/java/btools/router/KinematicPath.java
+index b5d1d2b..a26d6d3 100644
+--- a/brouter-core/src/main/java/btools/router/KinematicPath.java
++++ b/brouter-core/src/main/java/btools/router/KinematicPath.java
+@@ -53,7 +53,7 @@ final class KinematicPath extends OsmPath {
+ 
+         double curveSpeed = aa > 10. ? 200. / aa : 20.;
+         double distanceTime = dist / curveSpeed;
+-        double decayFactor = Math.exp(-distanceTime / km.turnAngleDecayTime);
++        double decayFactor = StrictMath.exp(-distanceTime / km.turnAngleDecayTime);
+         floatingAngleLeft = (float) (floatingAngleLeft * decayFactor);
+         floatingAngleRight = (float) (floatingAngleRight * decayFactor);
+ 
+diff --git a/brouter-core/src/main/java/btools/router/OsmPath.java b/brouter-core/src/main/java/btools/router/OsmPath.java
+index 9ce8123..eed49bf 100644
+--- a/brouter-core/src/main/java/btools/router/OsmPath.java
++++ b/brouter-core/src/main/java/btools/router/OsmPath.java
+@@ -279,8 +279,8 @@ abstract class OsmPath implements OsmLinkHolder {
+         if (rc.startDirectionValid) {
+           double dir = rc.startDirection * CheapRuler.DEG_TO_RAD;
+           double[] lonlat2m = CheapRuler.getLonLatToMeterScales((lon0 + lat1) >> 1);
+-          lon0 = lon1 - (int) (1000. * Math.sin(dir) / lonlat2m[0]);
+-          lat0 = lat1 - (int) (1000. * Math.cos(dir) / lonlat2m[1]);
++          lon0 = lon1 - (int) (1000. * StrictMath.sin(dir) / lonlat2m[0]);
++          lat0 = lat1 - (int) (1000. * StrictMath.cos(dir) / lonlat2m[1]);
+         } else {
+           lon0 = lon1 - (lon2 - lon1);
+           lat0 = lat1 - (lat2 - lat1);
+diff --git a/brouter-core/src/main/java/btools/router/StdPath.java b/brouter-core/src/main/java/btools/router/StdPath.java
+index a91e393..abd5283 100644
+--- a/brouter-core/src/main/java/btools/router/StdPath.java
++++ b/brouter-core/src/main/java/btools/router/StdPath.java
+@@ -280,7 +280,7 @@ final class StdPath extends OsmPath {
+     } else if (elevation_buffer < -min_delta) {
+       shift = min_delta;
+     }
+-    double decayFactor = Math.exp(-dist / 100.);
++    double decayFactor = StrictMath.exp(-dist / 100.);
+     float new_elevation_buffer = (float) ((elevation_buffer + shift) * decayFactor - shift);
+     double incline = (elevation_buffer - new_elevation_buffer) / dist;
+     elevation_buffer = new_elevation_buffer;
+@@ -307,7 +307,7 @@ final class StdPath extends OsmPath {
+     double f_roll = rc.totalMass * GRAVITY * (rc.defaultC_r + incline);
+     if (rc.footMode) {
+       // Use Tobler's hiking function for walking sections
+-      speed = rc.maxSpeed * Math.exp(-3.5 * Math.abs(incline + 0.05));
++      speed = rc.maxSpeed * StrictMath.exp(-3.5 * Math.abs(incline + 0.05));
+     } else if (rc.bikeMode) {
+       speed = solveCubic(rc.S_C_x, f_roll, rc.bikerPower);
+       speed = Math.min(speed, maxSpeed);
+diff --git a/brouter-util/src/main/java/btools/util/CheapAngleMeter.java b/brouter-util/src/main/java/btools/util/CheapAngleMeter.java
+index 36b6c33..291db87 100644
+--- a/brouter-util/src/main/java/btools/util/CheapAngleMeter.java
++++ b/brouter-util/src/main/java/btools/util/CheapAngleMeter.java
+@@ -51,7 +51,7 @@ public final class CheapAngleMeter {
+     double res = 0;
+     double xdiff = lat2 - lat1;
+     double ydiff = lon2 - lon1;
+-    res = Math.toDegrees(Math.atan2(ydiff, xdiff));
++    res = Math.toDegrees(StrictMath.atan2(ydiff, xdiff));
+     return res;
+   }
+ 
+diff --git a/brouter-util/src/main/java/btools/util/CheapRuler.java b/brouter-util/src/main/java/btools/util/CheapRuler.java
+index 454b2b9..f947b05 100644
+--- a/brouter-util/src/main/java/btools/util/CheapRuler.java
++++ b/brouter-util/src/main/java/btools/util/CheapRuler.java
+@@ -34,7 +34,7 @@ public final class CheapRuler {
+ 
+   private static double[] calcKxKyFromILat(int ilat) {
+     double lat = DEG_TO_RAD * (ilat * ILATLNG_TO_LATLNG - 90);
+-    double cos = Math.cos(lat);
++    double cos = StrictMath.cos(lat);
+     double cos2 = 2 * cos * cos - 1;
+     double cos3 = 2 * cos * cos2 - cos;
+     double cos4 = 2 * cos * cos3 - cos2;
+@@ -84,8 +84,8 @@ public final class CheapRuler {
+     double lon2m = lonlat2m[0];
+     double lat2m = lonlat2m[1];
+     angle = 90. - angle;
+-    double st = Math.sin(angle * Math.PI / 180.);
+-    double ct = Math.cos(angle * Math.PI / 180.);
++    double st = StrictMath.sin(angle * Math.PI / 180.);
++    double ct = StrictMath.cos(angle * Math.PI / 180.);
+ 
+     int lon2 = (int) (0.5 + lon1 + ct * distance / lon2m);
+     int lat2 = (int) (0.5 + lat1 + st * distance / lat2m);

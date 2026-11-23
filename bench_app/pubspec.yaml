@@ -1,0 +1,21 @@
+name: brouter_bench
+description: Runs the layer-3 golden routes of brouter_dart on a phone, checks them against Java and times them (`docs/design.md` D6 stage 3).
+publish_to: none
+version: 0.0.1+1
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  brouter:
+    path: ..
+  path_provider: ^2.1.5
+
+flutter:
+  assets:
+    - assets/
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

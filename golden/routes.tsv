@@ -1,0 +1,18 @@
+# Route cases for layer 3 (`docs/design.md` D5): public trailheads, summits, huts and
+# landmarks only, never anyone's track or position.
+# The points were typed from memory: where one lies more than 250 m from a
+# way, the engine's dynamic range snaps it further away without an error,
+# and the description says where the route really starts or ends.
+# name	from_lat	from_lon	to_lat	to_lon	what it covers
+songxue-road	24.1385	121.2869	24.1405	121.2880	short: 193 m along the road at Songxue Lodge
+hehuan-east	24.1385	121.2869	24.1375	121.2808	from Songxue Lodge; the end is snapped 106 m onto a path at about 3,230 m, below Hehuan East Peak; 1.5-1.9 km
+qixing	25.1665	121.5745	25.1720	121.5480	Qingtiangang to Qixing Main Peak, 5.7-6.4 km
+xueshan	24.3925	121.3330	24.3833	121.2317	day: Xueshan trailhead to Xueshan Main Peak, 21-22 km
+yushan	23.4880	120.9300	23.4700	120.9575	the start is snapped 1,770 m onto a path at about 3,500 m (not Tataka), down to about 3,400 m, then up to near Yushan Main Peak; 4 km
+jiaming	23.2880	120.9880	23.2930	121.0330	the start is snapped 532 m onto a path at about 3,530 m (not the Xiangyang trailhead), down to about 3,310 m near Jiaming Lake; 5.4 km
+taipei-bitan	25.0478	121.5170	24.9570	121.5370	crosses the two rd5 tiles at 25°N, 12-13 km
+taipei-wulai	25.0478	121.5170	24.8650	121.5500	long, crosses tiles: 36 km by hiking-mountain, 27 km by trekking
+yushan-dongpu	23.4880	120.9300	23.5650	120.9300	long: the start is snapped 1,770 m onto a path at about 3,500 m (not Tataka), down to about 1,390 m towards Dongpu; 24-30 km
+offshore-near	24.6000	121.9000	24.7500	121.8000	start in the sea a few km off Yilan: the start is searched for; 34 km by hiking-mountain, 27 km by trekking
+offshore-far	23.0000	123.0000	24.7500	121.8000	start far out at sea: no way within reach
+green-island	22.6600	121.4900	22.7500	121.1500	from an island to the main island: no route

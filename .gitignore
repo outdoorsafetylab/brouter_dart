@@ -1,0 +1,7 @@
+.dart_tool/
+build/
+*.rd5
+/golden/out/
+.dart_tool/
+build/
+pubspec.lock
