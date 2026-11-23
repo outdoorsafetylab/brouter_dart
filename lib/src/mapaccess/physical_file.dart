@@ -81,8 +81,20 @@ class PhysicalFile {
 
   PhysicalFile(File f, DataBuffers dataBuffers, int lookupVersion, int lookupMinorVersion)
     : fileName = f.uri.pathSegments.last {
-    final iobuffer = dataBuffers.iobuffer;
     final ra = this.ra = f.openSync();
+    // Java leaves the file open when the header does not read; here it is
+    // closed before the error goes on, or every failed check would keep one
+    // file open.
+    try {
+      _readHeader(ra, dataBuffers, lookupVersion);
+    } catch (_) {
+      close();
+      rethrow;
+    }
+  }
+
+  void _readHeader(RandomAccessFile ra, DataBuffers dataBuffers, int lookupVersion) {
+    final iobuffer = dataBuffers.iobuffer;
     readFully(ra, iobuffer, 200);
     final fileIndexCrc = crc32(iobuffer, 0, 200);
     var dis = ByteDataReader(iobuffer);
