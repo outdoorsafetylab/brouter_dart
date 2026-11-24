@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:brouter/src/codec/data_buffers.dart';
 import 'package:brouter/src/codec/micro_cache.dart';
 import 'package:brouter/src/codec/stat_coder_context.dart';
+import 'package:brouter/src/codec/tag_value_coder.dart';
 import 'package:brouter/src/expressions/expressions.dart';
 import 'package:brouter/src/mapaccess/data_file_exception.dart';
 import 'package:brouter/src/mapaccess/direct_weaver.dart';
@@ -40,6 +41,63 @@ Uint8List _microCacheHead({required int nodes, int dataSize = 0}) {
   bc.encodeVarBits((dataSize & 0xffffffff) >> 10);
   bc.closeAndGetEncodedLength();
   return ab;
+}
+
+/// A tag tree that is a chain of [innerNodes] inner nodes, each with an
+/// empty leaf on one side.
+Uint8List _tagChain(int innerNodes) {
+  final ab = Uint8List(256);
+  final bc = BitCoderContext(ab);
+  for (var i = 0; i < innerNodes; i++) {
+    bc.encodeBit(true); // inner node
+    bc.encodeBit(false); // leaf
+    bc.encodeVarBits(0); // empty
+  }
+  bc.encodeBit(false);
+  bc.encodeVarBits(0);
+  bc.closeAndGetEncodedLength();
+  return ab;
+}
+
+/// The start of a micro-cache of one node with one link whose target index
+/// is 0 + [diff], up to that index. Valid links are covered by the golden
+/// comparison.
+Uint8List _oneNodeOneLink(int diff) {
+  final ab = Uint8List(64);
+  final bc = BitCoderContext(ab);
+  for (var tree = 0; tree < 2; tree++) {
+    bc.encodeBit(false);
+    bc.encodeVarBits(0);
+  }
+  for (var i = 0; i < 5; i++) {
+    bc.encodeVarBits(0);
+  }
+  bc.encodeBounded(31, 1); // one node
+  bc.encodeVarBits(0);
+  bc.encodeBounded((1 << 30) - 1, 0); // its id
+  bc.encodeBounded(1023, 0); // no decoded data
+  bc.encodeVarBits(0);
+  bc.encodeVarBits(0); // no features
+  bc.encodeVarBits(0); // elevation
+  bc.encodeBounded(1, 1); // one link
+  bc.encodeVarBits(0);
+  bc.encodeVarBits(diff.abs()); // target index difference, not 0
+  bc.encodeBit(diff < 0);
+  bc.closeAndGetEncodedLength();
+  return ab;
+}
+
+/// A way tag tree of one leaf with more tag data than a description holds.
+Uint8List _oversizedTags() {
+  final ab = Uint8List(2048);
+  final bc = BitCoderContext(ab);
+  bc.encodeBit(false); // leaf
+  for (var i = 0; i < 300; i++) {
+    bc.encodeVarBits(1); // next tag
+    bc.encodeVarBits(4000); // its value
+  }
+  bc.encodeVarBits(0);
+  return Uint8List.sublistView(ab, 0, bc.closeAndGetEncodedLength());
 }
 
 /// A profile whose way expression is nested [deepest] levels deep.
@@ -144,6 +202,32 @@ void main() {
         expect(
           () => MicroCache2(head(nodes: 0, dataSize: dataSize), DataBuffers(), 0, 0, _divisor, null, null),
           throwsA(isA<FormatException>().having((e) => e.message, 'message', contains('$dataSize bytes'))),
+        );
+      });
+    }
+  });
+
+  group('tag tree', () {
+    test('a tree $maxTagTreeDepth inner nodes deep decodes', () {
+      expect(() => TagValueCoder(StatCoderContext(_tagChain(maxTagTreeDepth)), DataBuffers(), null), returnsNormally);
+    });
+
+    test('a deeper tree is rejected', () {
+      expect(
+        () => TagValueCoder(StatCoderContext(_tagChain(maxTagTreeDepth + 1)), DataBuffers(), null),
+        throwsA(isA<FormatException>().having((e) => e.message, 'message', contains('tag tree deeper'))),
+      );
+    });
+  });
+
+  group('link target', () {
+    for (final diff in [1, -1]) {
+      test('a link to node 0 + $diff of a one-node micro-cache is rejected', () {
+        final matcher = throwsA(isA<FormatException>().having((e) => e.message, 'message', contains('link to node $diff of 1')));
+        expect(() => MicroCache2(StatCoderContext(_oneNodeOneLink(diff)), DataBuffers(), 0, 0, _divisor, null, null), matcher);
+        expect(
+          () => DirectWeaver(StatCoderContext(_oneNodeOneLink(diff)), DataBuffers(), 0, 0, _divisor, null, null, OsmNodesMap()),
+          matcher,
         );
       });
     }
@@ -264,6 +348,32 @@ void main() {
           expect(
             () => osmf.createMicroCacheAt(lonIdx, latIdx, buffers, null, null, true, hollow),
             throwsA(_dataFileException('${maxMicroCacheNodes + 1} nodes')),
+          );
+        }
+      } finally {
+        pf.close();
+      }
+    });
+    test('a micro-cache that overruns a decoder buffer is a DataFileException', () {
+      final tile = segment.tileWithData;
+      final tags = _oversizedTags();
+      final block = segment.blockOf(tile, tags.length + 4);
+      final start = segment.blockStart(tile, block);
+      final end = segment.blockEnd(tile, block);
+      segment.bytes.fillRange(start, end - 4, 0);
+      segment.bytes.setRange(start, start + tags.length, tags);
+      segment.save(tile: tile, block: block);
+
+      final buffers = DataBuffers();
+      final pf = segment.open(buffers);
+      try {
+        final osmf = segment.square(pf, tile, buffers);
+        final lonIdx = (300 + tile ~/ 5) * _divisor + block % _divisor;
+        final latIdx = (115 + tile % 5) * _divisor + block ~/ _divisor;
+        for (final hollow in [null, OsmNodesMap()]) {
+          expect(
+            () => osmf.createMicroCacheAt(lonIdx, latIdx, buffers, null, null, true, hollow),
+            throwsA(_dataFileException('micro-cache does not decode: RangeError')),
           );
         }
       } finally {

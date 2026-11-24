@@ -6,6 +6,11 @@ import 'data_buffers.dart';
 import 'tag_value_validator.dart';
 import 'tag_value_wrapper.dart';
 
+/// Deepest tag tree accepted, counted in inner nodes from the root; the
+/// golden segments reach 14. BRouter has no limit, and a deeper tree would
+/// only take more stack.
+const maxTagTreeDepth = 256;
+
 /// Decoder for way and node descriptions, stored as a huffman tree sorted
 /// by frequency.
 class TagValueCoder {
@@ -13,7 +18,7 @@ class TagValueCoder {
   final BitCoderContext _bc;
 
   TagValueCoder(BitCoderContext bc, DataBuffers buffers, TagValueValidator? validator)
-    : _tree = _decodeTree(bc, buffers, validator),
+    : _tree = _decodeTree(bc, buffers, validator, 0),
       _bc = bc;
 
   TagValueWrapper? decodeTagValueSet() {
@@ -25,11 +30,14 @@ class TagValueCoder {
     return node as TagValueWrapper?;
   }
 
-  static Object? _decodeTree(BitCoderContext bc, DataBuffers buffers, TagValueValidator? validator) {
+  static Object? _decodeTree(BitCoderContext bc, DataBuffers buffers, TagValueValidator? validator, int depth) {
     final isNode = bc.decodeBit();
     if (isNode) {
-      final child1 = _decodeTree(bc, buffers, validator);
-      final child2 = _decodeTree(bc, buffers, validator);
+      if (depth >= maxTagTreeDepth) {
+        throw FormatException('tag tree deeper than $maxTagTreeDepth');
+      }
+      final child1 = _decodeTree(bc, buffers, validator, depth + 1);
+      final child2 = _decodeTree(bc, buffers, validator, depth + 1);
       return _TreeNode(child1, child2);
     }
 

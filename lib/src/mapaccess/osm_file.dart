@@ -170,6 +170,9 @@ class OsmFile {
     } on FormatException catch (e) {
       // the codec's limits on what a micro-cache may claim
       throw DataFileException(e.message);
+    } on ArgumentError catch (e) {
+      // RangeError included: an index or a buffer that the data overruns
+      throw DataFileException('micro-cache does not decode: $e');
     } finally {
       // crc check only if the buffer has not been fully read
       final readBytes = (bc.getReadingBitPosition() + 7) >> 3;
