@@ -27,6 +27,13 @@ void checkMicroCacheNodes(int size) {
   }
 }
 
+/// Throws [FormatException] for a link to a node outside the micro-cache.
+void checkLinkTarget(int nodeIdx, int size) {
+  if (nodeIdx < 0 || nodeIdx >= size) {
+    throw FormatException('link to node $nodeIdx of $size');
+  }
+}
+
 /// The data of an area of some square kilometres: the unit of io. Nodes are
 /// kept compact and independent of each other, so the ones already consumed
 /// can be garbage collected. The format differs from the data files, where
@@ -278,6 +285,7 @@ class MicroCache2 extends MicroCache {
       for (var li = 0; li < links; li++) {
         var sizeoffset = 0;
         final nodeIdx = n + nodeIdxDiff.decodeSignedValue();
+        checkLinkTarget(nodeIdx, _size);
 
         int dlonRemaining;
         int dlatRemaining;
