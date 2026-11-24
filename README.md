@@ -51,7 +51,7 @@ The engine works synchronously; run it in an isolate of your own. `package:brout
 The engine reads whatever it is given. Sizes, counts and offsets that no valid file has are rejected with `DataFileException`, and a profile that nests too deeply with `ArgumentError`. Even so, a file can still make routing slow or memory-hungry within those limits. So:
 
 - Download segments, `lookups.dat` and profiles only from a source you trust. Check each file against a published hash before use, as `golden/data/INPUT` does for the test inputs, and run `verifyLookups` before the first route.
-- Route in an isolate the app can stop. `doRun` takes a time limit, but nothing bounds memory, so give the isolate a limit of your own and kill it if it runs over.
+- Route in an isolate the app can stop. `doRun` takes a time limit, and `Isolate.kill` ends a route early. An isolate does not bound memory, though: Dart has no per-isolate memory limit, and the isolate shares the app's heap. So the limits above, and files from a trusted source, are what keep memory in check.
 - Keep only checked files in the segment directory. The engine opens any `<lon>_<lat>.rd5` there whose name matches a square the route crosses. It also reads `storageconfig.txt` there, whose `secondary_segment_dir=` line points it at a second directory for squares the segment directory lacks. Without that line, it looks for those squares in the working directory, as BRouter does.
 
 Pure Dart, no Flutter dependency. Android, iOS and macOS; not the web (the decoder needs 64-bit integer bit operations). Each file under `lib/src` names the Java class it was ported from.
