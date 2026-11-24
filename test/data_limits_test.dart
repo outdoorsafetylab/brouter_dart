@@ -354,6 +354,38 @@ void main() {
         pf.close();
       }
     });
+    test('a micro-cache that runs past its block decodes the same whatever the buffer held', () {
+      // zeros: a variable-length number whose prefix runs to the checksum,
+      // and whose value then needs as many bits again, past the block
+      final tile = segment.tileWithData;
+      final block = segment.blockOf(tile, 24);
+      final start = segment.blockStart(tile, block);
+      final end = segment.blockEnd(tile, block);
+      segment.bytes.fillRange(start, end - 4, 0);
+      segment.save(tile: tile, block: block);
+
+      String decode(int leftover) {
+        final buffers = DataBuffers();
+        final pf = segment.open(buffers);
+        try {
+          final osmf = segment.square(pf, tile, buffers);
+          buffers.iobuffer.fillRange(0, buffers.iobuffer.length, leftover);
+          final lonIdx = (300 + tile ~/ 5) * _divisor + block % _divisor;
+          final latIdx = (115 + tile % 5) * _divisor + block ~/ _divisor;
+          osmf.createMicroCacheAt(lonIdx, latIdx, buffers, null, null, true, null);
+          return 'decoded';
+        } on DataFileException catch (e) {
+          return e.message;
+        } finally {
+          pf.close();
+        }
+      }
+
+      final afterZeros = decode(0x00);
+      expect(decode(0xff), afterZeros);
+      expect(afterZeros, isNot('decoded'));
+    });
+
     test('a micro-cache that overruns a decoder buffer is a DataFileException', () {
       final tile = segment.tileWithData;
       final tags = _oversizedTags();

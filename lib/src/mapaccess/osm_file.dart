@@ -156,7 +156,9 @@ class OsmFile {
       asize = getDataInputForSubIdx(subIdx, ab);
     }
 
-    final bc = StatCoderContext(ab);
+    // Only the block's own bytes: the io buffer is reused, and past them it
+    // holds whatever was read before. BRouter reads the whole buffer.
+    final bc = StatCoderContext(Uint8List.sublistView(ab, 0, asize));
 
     try {
       if (!reallyDecode) {
