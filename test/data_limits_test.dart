@@ -3,6 +3,7 @@
 // FormatException) before it is used. Valid files never reach these checks;
 // the golden comparison shows that.
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:brouter/src/codec/data_buffers.dart';
@@ -243,6 +244,24 @@ void main() {
 
     test('an expression $maxProfileNesting levels deep parses', () {
       expect(() => way().parseProfile('deep.brf', _nestedProfile(maxProfileNesting), 'global', {}), returnsNormally);
+    });
+
+    test('an expression at the limit parses and evaluates in a spawned isolate', () async {
+      // a lookup at the bottom, so nothing folds into a constant and
+      // evaluating recurses through every level
+      final description = goldenTable('ways.hex.gz').elementAt(100)[0];
+      final lookups = goldenInput('lookups.dat').path;
+      final text =
+          '---context:way\nassign costfactor = ${'add 1 ' * (maxProfileNesting - 1)}highway=track\n';
+      final costfactor = await Isolate.run(() {
+        final meta = BExpressionMetaData();
+        final way = BExpressionContextWay.withHashSize(0, meta);
+        meta.readMetaData(File(lookups));
+        way.parseProfile('deep.brf', text, 'global', {});
+        way.evaluate(false, hexBytes(description));
+        return way.getCostfactor();
+      });
+      expect(costfactor, greaterThanOrEqualTo(maxProfileNesting - 1));
     });
 
     test('a deeper expression is rejected', () {
