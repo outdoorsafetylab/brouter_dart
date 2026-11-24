@@ -13,6 +13,20 @@ import 'tag_value_coder.dart';
 import 'tag_value_validator.dart';
 import 'waypoint_matcher.dart';
 
+/// Upper bounds on what one micro-cache may claim, checked before its arrays
+/// are allocated; BRouter has none. In the golden segments (Taiwan) a
+/// micro-cache holds at most 13,291 nodes and 285,486 bytes of decoded data;
+/// the limits leave room for dense cities.
+const maxMicroCacheNodes = 1 << 20;
+const maxMicroCacheDataSize = 16 << 20;
+
+/// Throws [FormatException] for a node count no valid micro-cache has.
+void checkMicroCacheNodes(int size) {
+  if (size < 0 || size > maxMicroCacheNodes) {
+    throw FormatException('micro-cache claims $size nodes');
+  }
+}
+
 /// The data of an area of some square kilometres: the unit of io. Nodes are
 /// kept compact and independent of each other, so the ones already consumed
 /// can be garbage collected. The format differs from the data files, where
@@ -187,6 +201,7 @@ class MicroCache2 extends MicroCache {
     final transEleDiff = NoisyDiffCoder(bc);
 
     _size = bc.decodeNoisyNumber(5);
+    checkMicroCacheNodes(_size);
     var faid = _size > dataBuffers.ibuf2.length ? Int32List(_size) : dataBuffers.ibuf2;
     var fapos = _size > dataBuffers.ibuf3.length ? Int32List(_size) : dataBuffers.ibuf3;
 
@@ -202,6 +217,9 @@ class MicroCache2 extends MicroCache {
     }
 
     final netdatasize = bc.decodeNoisyNumber(10);
+    if (netdatasize < 0 || netdatasize > maxMicroCacheDataSize) {
+      throw FormatException('micro-cache claims $netdatasize bytes of data');
+    }
     ab = netdatasize > dataBuffers.bbuf1.length ? Uint8List(netdatasize) : dataBuffers.bbuf1;
     aboffset = 0;
 

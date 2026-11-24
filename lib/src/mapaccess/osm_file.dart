@@ -72,6 +72,20 @@ class OsmFile {
       for (var i = 0; i < ncaches; i++) {
         posIdx[i] = dis.readInt();
       }
+
+      // The blocks lie in order inside this square, after the index, and a
+      // block that is not empty holds at least its 4-byte checksum. BRouter
+      // does not check this.
+      final squareLength = index[tileIndex] - _fileOffset;
+      var start = _indexsize;
+      for (var i = 0; i < ncaches; i++) {
+        final end = posIdx[i];
+        final size = end - start;
+        if (size < 0 || (size > 0 && size < 4) || end > squareLength) {
+          throw DataFileException('sub index out of order');
+        }
+        start = end;
+      }
     }
   }
 
@@ -153,6 +167,9 @@ class OsmFile {
       }
       DirectWeaver(bc, dataBuffers, lonIdx, latIdx, _divisor, wayValidator, waypointMatcher, hollowNodes);
       return MicroCache.emptyNonVirgin;
+    } on FormatException catch (e) {
+      // the codec's limits on what a micro-cache may claim
+      throw DataFileException(e.message);
     } finally {
       // crc check only if the buffer has not been fully read
       final readBytes = (bc.getReadingBitPosition() + 7) >> 3;

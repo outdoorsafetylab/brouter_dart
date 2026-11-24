@@ -106,6 +106,17 @@ class PhysicalFile {
       }
       fileIndex[i] = lv & 0xffffffffffff;
     }
+    // Each one-degree square ends where the next starts, the first after this
+    // 200-byte index; the end of the last is checked against the file length
+    // below. BRouter does not check this.
+    if (fileIndex[0] < 200) {
+      throw DataFileException('file index starts inside the header');
+    }
+    for (var i = 1; i < 25; i++) {
+      if (fileIndex[i] < fileIndex[i - 1]) {
+        throw DataFileException('file index out of order');
+      }
+    }
 
     // read some extra info from the end of the file, if present
     final len = ra.lengthSync();
