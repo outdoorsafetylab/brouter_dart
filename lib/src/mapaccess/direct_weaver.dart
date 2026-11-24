@@ -2,6 +2,7 @@
 import 'dart:typed_data';
 
 import '../codec/data_buffers.dart';
+import '../codec/micro_cache.dart';
 import '../codec/noisy_diff_coder.dart';
 import '../codec/stat_coder_context.dart';
 import '../codec/tag_value_coder.dart';
@@ -39,6 +40,7 @@ class DirectWeaver extends ByteDataWriter {
     final transEleDiff = NoisyDiffCoder(bc);
 
     final size = bc.decodeNoisyNumber(5);
+    checkMicroCacheNodes(size);
 
     final faid = size > dataBuffers.ibuf2.length ? Int32List(size) : dataBuffers.ibuf2;
 
