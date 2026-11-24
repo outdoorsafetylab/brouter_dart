@@ -1,6 +1,12 @@
 // Port of btools.expressions.BExpression (BRouter v1.7.10, MIT).
 part of 'expressions.dart';
 
+/// Deepest nesting a profile expression may have, the top-level `assign`
+/// being level 0. BRouter's own profiles (v1.7.10 misc/profiles2) reach 36;
+/// the limit leaves room for long switch chains. BRouter has none, and
+/// parsing and evaluating recurse once per level.
+const maxProfileNesting = 1000;
+
 /// One node of a parsed rule. Values are Java floats: every result is
 /// rounded with [fround], so it carries the bits Java computes.
 final class BExpression {
@@ -87,6 +93,9 @@ final class BExpression {
   }
 
   static BExpression? _parseRaw(BExpressionContext ctx, int level, String? optionalToken) {
+    if (level > maxProfileNesting) {
+      throw ArgumentError('expression nested deeper than $maxProfileNesting levels');
+    }
     var brackets = false;
     var operator = ctx._parseToken();
     if (optionalToken != null && optionalToken == operator) {
