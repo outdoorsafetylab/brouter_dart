@@ -211,8 +211,9 @@ void main() {
       });
 
       test('a block ending beyond its square is rejected', () {
+        // 16 bytes beyond: long enough not to be rejected as too short
         final last = _divisor * _divisor - 1;
-        segment.setSubIndex(tile, last, segment.fileIndex(tile) - segment.squareStart(tile) + 1);
+        segment.setSubIndex(tile, last, segment.fileIndex(tile) - segment.squareStart(tile) + 16);
         expectRejected();
       });
     });
