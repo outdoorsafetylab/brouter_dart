@@ -21,7 +21,13 @@ void main() {
   test('LruMap evicts least recently used first, touch refreshes', () {
     final m = LruMap(4, 3); // 4 bins, one key in each
     final nodes = [for (var k = 0; k < 3; k++) _Node(k)];
-    expect({for (final n in [...nodes, _Node(7)]) (n.hash & 0xfffffff) % 4}.length, 4, reason: 'this case spreads over bins');
+    expect(
+      {
+        for (final n in [...nodes, _Node(7)]) (n.hash & 0xfffffff) % 4,
+      }.length,
+      4,
+      reason: 'this case spreads over bins',
+    );
     for (final n in nodes) {
       expect(m.removeLru(), isNull, reason: 'not full yet');
       m.put(n);

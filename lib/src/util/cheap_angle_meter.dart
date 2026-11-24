@@ -53,14 +53,13 @@ class CheapAngleMeter {
     return fdlibm.atan2(ydiff, xdiff) * _radiansToDegrees;
   }
 
-  static double getDirection(int lon1, int lat1, int lon2, int lat2) =>
-      normalize(getAngle(lon1, lat1, lon2, lat2));
+  static double getDirection(int lon1, int lat1, int lon2, int lat2) => normalize(getAngle(lon1, lat1, lon2, lat2));
 
   static double normalize(double a) => a >= 360
       ? a - (360 * (a / 360).truncate())
       : a < 0
-          ? a - (360 * ((a / 360).truncate() - 1))
-          : a;
+      ? a - (360 * ((a / 360).truncate() - 1))
+      : a;
 
   static double getDifferenceFromDirection(double b1, double b2) {
     // Java's % on doubles keeps the sign of the dividend: remainder, not %.

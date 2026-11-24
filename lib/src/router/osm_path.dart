@@ -170,7 +170,7 @@ abstract class OsmPath implements OsmLinkHolder {
         ? null
         : rc.geometryDecoder.decodeGeometry(link.geometry, sourceNode, targetNode, isReverse);
 
-    for (var nsection = 0;; nsection++) {
+    for (var nsection = 0; ; nsection++) {
       originLon = lon1;
       originLat = lat1;
 
@@ -198,9 +198,23 @@ abstract class OsmPath implements OsmLinkHolder {
       if (nsection == 0 && rc.considerTurnRestrictions && !detailMode && !isStartpoint) {
         if (rc.inverseDirection
             ? TurnRestriction.isTurnForbidden(
-                sourceNode.firstRestriction, lon2, lat2, lon0, lat0, rc.bikeMode || rc.footMode, rc.carMode)
+                sourceNode.firstRestriction,
+                lon2,
+                lat2,
+                lon0,
+                lat0,
+                rc.bikeMode || rc.footMode,
+                rc.carMode,
+              )
             : TurnRestriction.isTurnForbidden(
-                sourceNode.firstRestriction, lon0, lat0, lon2, lat2, rc.bikeMode || rc.footMode, rc.carMode)) {
+                sourceNode.firstRestriction,
+                lon0,
+                lat0,
+                lon2,
+                lat2,
+                rc.bikeMode || rc.footMode,
+                rc.carMode,
+              )) {
           cost = -1;
           return;
         }
@@ -277,7 +291,16 @@ abstract class OsmPath implements OsmLinkHolder {
       final elevation = ele2 == _shortMin ? 100.0 : ele2 / 4.0;
 
       var sectionCost = processWaySection(
-          rc, dist.toDouble(), deltaH, elevation, angle, cosangle, isStartpoint, nsection, lastpriorityclassifier);
+        rc,
+        dist.toDouble(),
+        deltaH,
+        elevation,
+        angle,
+        cosangle,
+        isStartpoint,
+        nsection,
+        lastpriorityclassifier,
+      );
       if ((sectionCost < 0.0 || costfactor > 9998.0 && !detailMode) || sectionCost + cost >= 2000000000.0) {
         cost = -1;
         return;
@@ -361,8 +384,17 @@ abstract class OsmPath implements OsmLinkHolder {
     return i16(d2i(e1 * (1.0 - fraction) + e2 * fraction));
   }
 
-  double processWaySection(RoutingContext rc, double dist, double deltaH, double elevation, double angle,
-      double cosangle, bool isStartpoint, int nsection, int lastpriorityclassifier);
+  double processWaySection(
+    RoutingContext rc,
+    double dist,
+    double deltaH,
+    double elevation,
+    double angle,
+    double cosangle,
+    bool isStartpoint,
+    int nsection,
+    int lastpriorityclassifier,
+  );
 
   double processTargetNode(RoutingContext rc);
 

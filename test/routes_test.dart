@@ -57,9 +57,16 @@ void main() {
       }
       expect(re.getErrorMessage(), isNull);
       final t = re.getFoundTrack()!;
-      final got = ['ok', t.distance, t.ascend, t.plainAscend, t.cost, t.energy, t.getTotalSeconds(), t.nodes.length]
-          .map((e) => '$e')
-          .toList();
+      final got = [
+        'ok',
+        t.distance,
+        t.ascend,
+        t.plainAscend,
+        t.cost,
+        t.energy,
+        t.getTotalSeconds(),
+        t.nodes.length,
+      ].map((e) => '$e').toList();
       final pts = [
         for (final e in t.nodes)
           [
@@ -69,7 +76,7 @@ void main() {
             '${e.cost}',
             _hex8(e.getTime()),
             _hex8(e.getEnergy()),
-          ]
+          ],
       ];
       // the first point that differs says more than the totals
       for (var i = 0; i < pts.length && i < c.nodes.length; i++) {

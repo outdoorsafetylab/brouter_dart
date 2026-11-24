@@ -16,9 +16,9 @@ class ByteArrayUnifier implements IByteArrayUnifier {
   final Int32List? _crcCrosscheck;
 
   ByteArrayUnifier(int size, bool validateImmutability)
-      : _size = size,
-        _cache = List<Uint8List?>.filled(size, null),
-        _crcCrosscheck = validateImmutability ? Int32List(size) : null;
+    : _size = size,
+      _cache = List<Uint8List?>.filled(size, null),
+      _crcCrosscheck = validateImmutability ? Int32List(size) : null;
 
   Uint8List unifyAll(Uint8List ab) => unify(ab, 0, ab.length);
 

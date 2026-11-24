@@ -8,8 +8,7 @@ class RoutingContext {
 
   void setAlternativeIdx(int idx) => alternativeIdx = idx;
 
-  int getAlternativeIdx(int min, int max) =>
-      alternativeIdx < min ? min : (alternativeIdx > max ? max : alternativeIdx);
+  int getAlternativeIdx(int min, int max) => alternativeIdx < min ? min : (alternativeIdx > max ? max : alternativeIdx);
 
   /// Path of the .brf profile.
   String? localFunction;

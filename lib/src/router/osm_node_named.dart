@@ -33,12 +33,14 @@ class OsmNodeNamed extends OsmNode {
       isLastPointWithinCircle = isFirstPointWithinCircle;
       isFirstPointWithinCircle = false;
     }
-    final initialToProject = ((lon2 - lon1) * (ilon - lon1) * lonlat2m[0] * lonlat2m[0] +
+    final initialToProject =
+        ((lon2 - lon1) * (ilon - lon1) * lonlat2m[0] * lonlat2m[0] +
             (lat2 - lat1) * (ilat - lat1) * lonlat2m[1] * lonlat2m[1]) /
         totalSegmentLength;
     final initialToCenter = CheapRuler.distance(ilon, ilat, lon1, lat1);
-    final halfDistanceWithin =
-        math.sqrt(radius * radius - (initialToCenter * initialToCenter - initialToProject * initialToProject));
+    final halfDistanceWithin = math.sqrt(
+      radius * radius - (initialToCenter * initialToCenter - initialToProject * initialToProject),
+    );
     if (isLastPointWithinCircle) {
       return halfDistanceWithin + (totalSegmentLength - initialToProject);
     }

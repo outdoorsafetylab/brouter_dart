@@ -78,8 +78,11 @@ void main() {
       }
     }
     expect(compared, ways.length * 40 + nodes.length * 2);
-    expect(failures, isEmpty,
-        reason: '${failures.length} of $compared values differ, first:\n${failures.take(10).join('\n')}');
+    expect(
+      failures,
+      isEmpty,
+      reason: '${failures.length} of $compared values differ, first:\n${failures.take(10).join('\n')}',
+    );
   }
 
   for (final profile in _profiles) {
@@ -123,14 +126,16 @@ void main() {
         nodeBits[g].setUint32(4 * n, floatToRawIntBits(node.getInitialcost()));
       }
     }
-    String crc(ByteData b) => (crc32(b.buffer.asUint8List(), 0, b.lengthInBytes) & 0xffffffff).toRadixString(16).padLeft(8, '0');
+    String crc(ByteData b) =>
+        (crc32(b.buffer.asUint8List(), 0, b.lengthInBytes) & 0xffffffff).toRadixString(16).padLeft(8, '0');
     final got = [
       for (var i = 0; i < 40; i++) ['way', i < 20 ? 'forward' : 'reverse', wayVars[i % 20], crc(wayBits[i])],
       for (var g = 0; g < 2; g++) ['node', '${g == 1}', 'initialcost', crc(nodeBits[g])],
     ];
     final differ = [
       for (var i = 0; i < 42; i++)
-        if (rows[i].join('\t') != got[i].join('\t')) 'line ${i + 1}: want ${rows[i].join(' ')}, got ${got[i].join(' ')}',
+        if (rows[i].join('\t') != got[i].join('\t'))
+          'line ${i + 1}: want ${rows[i].join(' ')}, got ${got[i].join(' ')}',
     ];
     expect(differ, isEmpty, reason: '${differ.length} of 42 differ:\n${differ.join('\n')}');
   });
@@ -183,8 +188,11 @@ void main() {
     expect(parse('$global---context:way\nassign costfactor limit\n').getVariableValue('limit', 0), 3);
     final ab = hexBytes(ways[100]);
     for (final zero in ['0', 'multiply -1 0']) {
-      expect(() => parse('---context:way\nassign costfactor divide 1 $zero\n').evaluate(false, ab),
-          throwsArgumentError, reason: 'divide by $zero');
+      expect(
+        () => parse('---context:way\nassign costfactor divide 1 $zero\n').evaluate(false, ab),
+        throwsArgumentError,
+        reason: 'divide by $zero',
+      );
     }
     parse('---context:way\nassign costfactor divide 1 2\n').evaluate(false, ab);
   });

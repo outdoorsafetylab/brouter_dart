@@ -168,7 +168,11 @@ class ByteDataWriter extends ByteDataReader {
     } while (v != 0);
     if (size > 1) {
       final a = ab!;
-      a.setRange(sizeoffset + size, sizeoffset + size + datasize, Uint8List.fromList(a.sublist(sizeoffset + 1, sizeoffset + 1 + datasize)));
+      a.setRange(
+        sizeoffset + size,
+        sizeoffset + size + datasize,
+        Uint8List.fromList(a.sublist(sizeoffset + 1, sizeoffset + 1 + datasize)),
+      );
     }
     aboffset = sizeoffset;
     writeVarLengthUnsigned(datasize);

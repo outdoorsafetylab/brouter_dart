@@ -64,8 +64,8 @@ class RoutingEngine {
   /// [clock] returns milliseconds and is only for tests; the default is a
   /// monotonic clock.
   RoutingEngine(Directory segmentDir, this.waypoints, this.routingContext, {int Function()? clock})
-      : _segmentDir = segmentDir,
-        _clock = clock ?? _monotonicMillis {
+    : _segmentDir = segmentDir,
+      _clock = clock ?? _monotonicMillis {
     _parseProfile(routingContext);
   }
 
@@ -126,9 +126,10 @@ class RoutingEngine {
       var refTracks = List<OsmTrack?>.filled(nsections, null); // used ways for alternatives
       var lastTracks = List<OsmTrack?>.filled(nsections, null);
       final messageList = <String>[];
-      for (var i = 0;; i++) {
+      for (var i = 0; ; i++) {
         final track = _findTrackAll(refTracks, lastTracks)!;
-        track.message = 'track-length = ${track.distance} filtered ascend = ${track.ascend}'
+        track.message =
+            'track-length = ${track.distance} filtered ascend = ${track.ascend}'
             ' plain-ascend = ${track.plainAscend} cost=${track.cost}';
         track.name = 'brouter_${routingContext.getProfileName()}_$i';
         messageList.add(track.message!);
@@ -559,7 +560,12 @@ class RoutingEngine {
     }
   }
 
-  OsmTrack _searchRoutedTrack(MatchedWaypoint startWp, MatchedWaypoint endWp, OsmTrack? nearbyTrack, OsmTrack? refTrack) {
+  OsmTrack _searchRoutedTrack(
+    MatchedWaypoint startWp,
+    MatchedWaypoint endWp,
+    OsmTrack? nearbyTrack,
+    OsmTrack? refTrack,
+  ) {
     OsmTrack? track;
     final airDistanceCostFactors = [routingContext.pass1coefficient, routingContext.pass2coefficient];
 
@@ -604,8 +610,14 @@ class RoutingEngine {
 
   void _resetCache(bool detailed) {
     final maxmem = routingContext.memoryclass * 1024 * 1024; // in MB
-    _nodesCache = NodesCache(_segmentDir, _WayCacheContext(routingContext.expctxWay!),
-        routingContext.forceSecondaryData, maxmem, _nodesCache, detailed);
+    _nodesCache = NodesCache(
+      _segmentDir,
+      _WayCacheContext(routingContext.expctxWay!),
+      routingContext.forceSecondaryData,
+      maxmem,
+      _nodesCache,
+      detailed,
+    );
     _islandNodePairs.clearTempPairs();
   }
 
@@ -653,8 +665,14 @@ class RoutingEngine {
     }
   }
 
-  OsmTrack? _findTrack(String operationName, MatchedWaypoint startWp, MatchedWaypoint? endWp,
-      OsmTrack? costCuttingTrack, OsmTrack? refTrack, bool fastPartialRecalc) {
+  OsmTrack? _findTrack(
+    String operationName,
+    MatchedWaypoint startWp,
+    MatchedWaypoint? endWp,
+    OsmTrack? costCuttingTrack,
+    OsmTrack? refTrack,
+    bool fastPartialRecalc,
+  ) {
     try {
       final wpts2 = <OsmNode>[];
       wpts2.add(startWp.waypoint!);
@@ -671,8 +689,14 @@ class RoutingEngine {
     }
   }
 
-  OsmTrack? _findTrackInner(String operationName, MatchedWaypoint startWp, MatchedWaypoint? endWp,
-      OsmTrack? costCuttingTrack, OsmTrack? refTrack, bool fastPartialRecalc) {
+  OsmTrack? _findTrackInner(
+    String operationName,
+    MatchedWaypoint startWp,
+    MatchedWaypoint? endWp,
+    OsmTrack? costCuttingTrack,
+    OsmTrack? refTrack,
+    bool fastPartialRecalc,
+  ) {
     final cache = _nodesCache!;
     final verbose = _guideTrack != null;
 
@@ -699,8 +723,8 @@ class RoutingEngine {
       cache.nodesMap.endNode1 = end1;
       cache.nodesMap.endNode2 = end2;
       endPos = OsmNodeNamed.of(endWp.crosspoint!);
-      sameSegmentSearch = (identical(start1, end1) && identical(start2, end2)) ||
-          (identical(start1, end2) && identical(start2, end1));
+      sameSegmentSearch =
+          (identical(start1, end1) && identical(start2, end2)) || (identical(start1, end2) && identical(start2, end1));
     }
     if (!cache.obtainNonHollowNode(start1)) return null;
     cache.expandHollowLinkTargets(start1);
@@ -856,7 +880,9 @@ class RoutingEngine {
         sourceNode.unlinkLink(currentLink);
 
         // if the counterlink is alive and does not yet have a path, remove it
-        if (isBidir && currentLink.getFirstLinkHolder(currentNode) == null && !routingContext.considerTurnRestrictions) {
+        if (isBidir &&
+            currentLink.getFirstLinkHolder(currentNode) == null &&
+            !routingContext.considerTurnRestrictions) {
           currentNode.unlinkLink(currentLink);
         }
       }
@@ -888,8 +914,8 @@ class RoutingEngine {
         if (_guideTrack != null) {
           final gidx = path.treedepth + 1;
           if (gidx >= _guideTrack!.nodes.length) continue;
-          final guideNode = _guideTrack!.nodes[
-              routingContext.inverseRouting ? _guideTrack!.nodes.length - 1 - gidx : gidx];
+          final guideNode =
+              _guideTrack!.nodes[routingContext.inverseRouting ? _guideTrack!.nodes.length - 1 - gidx : gidx];
           final nextId = nextNode.getIdFromPos();
           if (nextId != guideNode.getIdFromPos()) {
             // not along the guide-track, discard, but register for voice

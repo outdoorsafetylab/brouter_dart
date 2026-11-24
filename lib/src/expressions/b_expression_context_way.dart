@@ -59,8 +59,8 @@ final class BExpressionContextWay extends BExpressionContext implements TagValue
     return minCostFactor < 9999.0
         ? 2
         : _decodeForbidden
-            ? (minCostFactor < 10000.0 ? 1 : 0)
-            : 0;
+        ? (minCostFactor < 10000.0 ? 1 : 0)
+        : 0;
   }
 
   @override

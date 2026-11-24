@@ -129,8 +129,20 @@ void main() {
     }
 
     test('the limits themselves are accepted', () {
+      expect(() => checkMicroCacheNodes(maxMicroCacheNodes), returnsNormally);
       // An empty micro-cache claiming the largest data size decodes.
-      expect(MicroCache2(head(nodes: 0, dataSize: maxMicroCacheDataSize), DataBuffers(), 0, 0, _divisor, null, null).getSize(), 0);
+      expect(
+        MicroCache2(
+          head(nodes: 0, dataSize: maxMicroCacheDataSize),
+          DataBuffers(),
+          0,
+          0,
+          _divisor,
+          null,
+          null,
+        ).getSize(),
+        0,
+      );
     });
 
     for (final dataSize in [maxMicroCacheDataSize + 1, -1]) {

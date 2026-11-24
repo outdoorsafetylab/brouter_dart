@@ -154,7 +154,8 @@ final class BExpression {
             if (variable.contains('=')) throw ArgumentError("variable name cannot contain '=': $variable");
             if (variable.contains(':')) throw ArgumentError('cannot assign context-prefixed variable: $variable');
             exp._variableIdx = ctx._getVariableIdx(variable, true);
-            if (exp._variableIdx < ctx._minWriteIdx) throw ArgumentError('cannot assign to readonly variable $variable');
+            if (exp._variableIdx < ctx._minWriteIdx)
+              throw ArgumentError('cannot assign to readonly variable $variable');
           } else if ('not' == operator) {
             exp._typ = _notExp;
           } else {

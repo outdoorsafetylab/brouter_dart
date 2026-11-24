@@ -105,9 +105,9 @@ final class _SortedBin {
   int lp; // low pointer
 
   _SortedBin(this.binsize, this._parent)
-      : al = Int32List(binsize),
-        vla = List<Object?>.filled(binsize, null),
-        lp = binsize;
+    : al = Int32List(binsize),
+      vla = List<Object?>.filled(binsize, null),
+      lp = binsize;
 
   _SortedBin nextBin() => _next ??= _SortedBin(binsize << 1, _parent);
 
