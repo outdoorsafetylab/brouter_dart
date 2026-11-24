@@ -107,6 +107,7 @@ class DirectWeaver extends ByteDataWriter {
       final links = bc.decodeNoisyNumber(1);
       for (var li = 0; li < links; li++) {
         final nodeIdx = n + nodeIdxDiff.decodeSignedValue();
+        checkLinkTarget(nodeIdx, size);
 
         int dlonRemaining;
         int dlatRemaining;
