@@ -20,11 +20,15 @@ class BitCoderContext {
 
   static bool _tablesReady = false;
 
-  BitCoderContext(Uint8List ab) : _ab = ab, _idxMax = ab.length - 1 {
+  BitCoderContext(Uint8List ab)
+      : _ab = ab,
+        _idxMax = ab.length - 1 {
     _initTables();
   }
 
-  BitCoderContext._raw(Uint8List ab) : _ab = ab, _idxMax = ab.length - 1;
+  BitCoderContext._raw(Uint8List ab)
+      : _ab = ab,
+        _idxMax = ab.length - 1;
 
   // The Java static initializer, run once.
   static void _initTables() {

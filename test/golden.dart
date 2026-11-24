@@ -6,10 +6,7 @@ import 'dart:typed_data';
 List<List<String>> goldenTable(String name) {
   final file = File('golden/data/$name');
   final text = String.fromCharCodes(gzip.decode(file.readAsBytesSync()));
-  return [
-    for (final line in text.split('\n'))
-      if (line.isNotEmpty) line.split('\t'),
-  ];
+  return [for (final line in text.split('\n')) if (line.isNotEmpty) line.split('\t')];
 }
 
 final _bd = ByteData(8);
@@ -89,15 +86,10 @@ void _download(String release, Directory dir) {
     final tmp = Directory('${dir.path}.tmp');
     if (tmp.existsSync()) tmp.deleteSync(recursive: true);
     tmp.createSync();
-    final r = Process.runSync('gh', [
-      'release',
-      'download',
-      release,
-      '--repo',
-      'outdoorsafetylab/brouter_dart',
-      '--dir',
-      tmp.path,
-    ]);
+    final r = Process.runSync(
+      'gh',
+      ['release', 'download', release, '--repo', 'outdoorsafetylab/brouter_dart', '--dir', tmp.path],
+    );
     if (r.exitCode != 0) {
       tmp.deleteSync(recursive: true);
       throw StateError('gh release download $release failed: ${r.stderr}');

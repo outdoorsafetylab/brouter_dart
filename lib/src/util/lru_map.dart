@@ -20,7 +20,10 @@ class LruMap {
   LruMapNode? _mru;
   final List<LruMapNode?> _binArray;
 
-  LruMap(int bins, int size) : _hashbins = bins, _maxsize = size, _binArray = List<LruMapNode?>.filled(bins, null);
+  LruMap(int bins, int size)
+      : _hashbins = bins,
+        _maxsize = size,
+        _binArray = List<LruMapNode?>.filled(bins, null);
 
   LruMapNode? get(LruMapNode key) {
     final bin = (key.hash & 0xfffffff) % _hashbins;

@@ -410,10 +410,8 @@ abstract class BExpressionContext implements IByteArrayUnifier {
     if (nv != nv2) throw StateError('mismatch in variable-count: $nv<->$nv2');
     for (var i = 0; i < nv; i++) {
       if (_variableData![i] != other._variableData![i]) {
-        throw StateError(
-          'mismatch in variable ${variableName(i)} ${javaFloatToString(_variableData![i])}'
-          '<->${javaFloatToString(other._variableData![i])}\ntags = ${getKeyValueDescription(false, encode()!)}',
-        );
+        throw StateError('mismatch in variable ${variableName(i)} ${javaFloatToString(_variableData![i])}'
+            '<->${javaFloatToString(other._variableData![i])}\ntags = ${getKeyValueDescription(false, encode()!)}');
       }
     }
   }

@@ -46,17 +46,8 @@ final class StdPath extends OsmPath {
   static double _fi(int x) => fround(x.toDouble());
 
   @override
-  double processWaySection(
-    RoutingContext rc,
-    double distance,
-    double deltaH,
-    double elevation,
-    double angle,
-    double cosangle,
-    bool isStartpoint,
-    int nsection,
-    int lastpriorityclassifier,
-  ) {
+  double processWaySection(RoutingContext rc, double distance, double deltaH, double elevation, double angle,
+      double cosangle, bool isStartpoint, int nsection, int lastpriorityclassifier) {
     final w = rc.expctxWay!;
     // calculate the costfactor inputs
     final turncostbase = w.getTurncost();
@@ -140,15 +131,11 @@ final class StdPath extends OsmPath {
       _ehbd = i32(_ehbd - reduce);
       var elevationCost = 0.0;
       if (_downhillcostdiv > 0) {
-        elevationCost = _f(
-          elevationCost + _f(_fmin(_fi(reduce), _f(_fi(dist) * downhillmaxslope)) / _fi(_downhillcostdiv)),
-        );
+        elevationCost = _f(elevationCost + _f(_fmin(_fi(reduce), _f(_fi(dist) * downhillmaxslope)) / _fi(_downhillcostdiv)));
       }
       if (downhillmaxslopecostdiv > 0) {
-        elevationCost = _f(
-          elevationCost +
-              _f(_fmax(0.0, _f(_fi(reduce) - _f(_fi(dist) * downhillmaxslope))) / _fi(downhillmaxslopecostdiv)),
-        );
+        elevationCost = _f(elevationCost +
+            _f(_fmax(0.0, _f(_fi(reduce) - _f(_fi(dist) * downhillmaxslope))) / _fi(downhillmaxslopecostdiv)));
       }
       if (elevationCost > 0) {
         sectionCost += elevationCost;
@@ -175,14 +162,11 @@ final class StdPath extends OsmPath {
       _ehbu = i32(_ehbu - reduce);
       var elevationCost = 0.0;
       if (_uphillcostdiv > 0) {
-        elevationCost = _f(
-          elevationCost + _f(_fmin(_fi(reduce), _f(_fi(dist) * uphillmaxslope)) / _fi(_uphillcostdiv)),
-        );
+        elevationCost = _f(elevationCost + _f(_fmin(_fi(reduce), _f(_fi(dist) * uphillmaxslope)) / _fi(_uphillcostdiv)));
       }
       if (uphillmaxslopecostdiv > 0) {
-        elevationCost = _f(
-          elevationCost + _f(_fmax(0.0, _f(_fi(reduce) - _f(_fi(dist) * uphillmaxslope))) / _fi(uphillmaxslopecostdiv)),
-        );
+        elevationCost = _f(elevationCost +
+            _f(_fmax(0.0, _f(_fi(reduce) - _f(_fi(dist) * uphillmaxslope))) / _fi(uphillmaxslopecostdiv)));
       }
       if (elevationCost > 0) {
         sectionCost += elevationCost;
@@ -196,9 +180,8 @@ final class StdPath extends OsmPath {
 
     // get the effective costfactor (slope dependent)
     // cfup * upweight + cf * (1.f - upweight - downweight) + cfdown * downweight, in float
-    final costfactor = _f(
-      _f(_f(cfup * upweight) + _f(cf * _f(_f(1.0 - upweight) - downweight))) + _f(cfdown * downweight),
-    );
+    final costfactor =
+        _f(_f(_f(cfup * upweight) + _f(cf * _f(_f(1.0 - upweight) - downweight))) + _f(cfdown * downweight));
 
     if (message != null) message!.costfactor = costfactor;
 

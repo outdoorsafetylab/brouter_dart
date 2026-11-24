@@ -62,16 +62,8 @@ RouteRun runCase(RouteCase c, Directory dir) {
     mismatch = 'error "${re.getErrorMessage()}"';
   } else {
     final t = re.getFoundTrack()!;
-    final got = [
-      'ok',
-      t.distance,
-      t.ascend,
-      t.plainAscend,
-      t.cost,
-      t.energy,
-      t.getTotalSeconds(),
-      t.nodes.length,
-    ].join('\t');
+    final got = ['ok', t.distance, t.ascend, t.plainAscend, t.cost, t.energy, t.getTotalSeconds(), t.nodes.length]
+        .join('\t');
     for (var i = 0; i < t.nodes.length && i < c.nodes.length && mismatch == null; i++) {
       final e = t.nodes[i];
       final p = [e.getILon(), e.getILat(), e.getSElev(), e.cost, _hex8(e.getTime()), _hex8(e.getEnergy())].join('\t');
@@ -94,17 +86,13 @@ List<List<RouteRun>> runBench(List<RouteCase> cases, Directory dir, int rounds, 
     for (final c in cases) {
       final run = runCase(c, dir);
       runs.add(run);
-      log?.call(
-        'round $r ${c.name} ${c.profile} ${(run.micros / 1000).toStringAsFixed(1)} ms'
-        '${run.mismatch == null ? '' : ' MISMATCH ${run.mismatch}'}',
-      );
+      log?.call('round $r ${c.name} ${c.profile} ${(run.micros / 1000).toStringAsFixed(1)} ms'
+          '${run.mismatch == null ? '' : ' MISMATCH ${run.mismatch}'}');
     }
     all.add(runs);
     final total = runs.fold<int>(0, (s, x) => s + x.micros);
-    log?.call(
-      'round $r total ${(total / 1000).toStringAsFixed(0)} ms,'
-      ' peak rss ${(ProcessInfo.maxRss / 1048576).toStringAsFixed(0)} MiB',
-    );
+    log?.call('round $r total ${(total / 1000).toStringAsFixed(0)} ms,'
+        ' peak rss ${(ProcessInfo.maxRss / 1048576).toStringAsFixed(0)} MiB');
   }
   return all;
 }
