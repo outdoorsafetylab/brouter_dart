@@ -3,9 +3,10 @@ part of 'expressions.dart';
 
 /// Deepest nesting a profile expression may have, the top-level `assign`
 /// being level 0. BRouter's own profiles (v1.7.10 misc/profiles2) reach 36.
-/// BRouter has no limit. Parsing and evaluating recurse once per level, and
-/// in a spawned isolate on macOS they overflow the stack at about 2,250
-/// levels; isolates on phones have smaller stacks. Hence 200.
+/// BRouter has no limit. Parsing and evaluating recurse once per level; in
+/// a spawned isolate they overflow the stack at about 2,250 levels on macOS,
+/// 2,420 on a Pixel 6 (Android 16) and 2,440 on an iPhone 13 (iOS 27), in
+/// release builds on the phones. Hence 200.
 const maxProfileNesting = 200;
 
 /// One node of a parsed rule. Values are Java floats: every result is
