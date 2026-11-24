@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:brouter/src/codec/data_buffers.dart';
 import 'package:brouter/src/codec/micro_cache.dart';
 import 'package:brouter/src/codec/stat_coder_context.dart';
+import 'package:brouter/src/expressions/expressions.dart';
 import 'package:brouter/src/mapaccess/data_file_exception.dart';
 import 'package:brouter/src/mapaccess/direct_weaver.dart';
 import 'package:brouter/src/mapaccess/osm_file.dart';
@@ -40,6 +41,10 @@ Uint8List _microCacheHead({required int nodes, int dataSize = 0}) {
   bc.closeAndGetEncodedLength();
   return ab;
 }
+
+/// A profile whose way expression is nested [deepest] levels deep.
+String _nestedProfile(int deepest) =>
+    '---context:global\nassign dummy 0\n---context:way\nassign costfactor = ${'add 1 ' * (deepest - 1)}1\n';
 
 /// A copy of a golden segment whose bytes the tests change, with the
 /// checksums BRouter keeps for them.
@@ -142,6 +147,26 @@ void main() {
         );
       });
     }
+  });
+
+  group('profile', () {
+    BExpressionContextWay way() {
+      final meta = BExpressionMetaData();
+      final way = BExpressionContextWay.withHashSize(4096, meta);
+      meta.readMetaData(goldenInput('lookups.dat'));
+      return way;
+    }
+
+    test('an expression $maxProfileNesting levels deep parses', () {
+      expect(() => way().parseProfile('deep.brf', _nestedProfile(maxProfileNesting), 'global', {}), returnsNormally);
+    });
+
+    test('a deeper expression is rejected', () {
+      expect(
+        () => way().parseProfile('deep.brf', _nestedProfile(maxProfileNesting + 1), 'global', {}),
+        throwsA(isA<ArgumentError>().having((e) => '${e.message}', 'message', contains('nested deeper than'))),
+      );
+    });
   });
 
   group('rd5 file', () {
