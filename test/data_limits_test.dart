@@ -330,12 +330,13 @@ void main() {
       }
     });
     test('a micro-cache that runs past its block decodes the same whatever the buffer held', () {
-      // a tag tree of inner nodes, which needs more bits than the block has
+      // zeros: a variable-length number whose prefix runs to the checksum,
+      // and whose value then needs as many bits again, past the block
       final tile = segment.tileWithData;
       final block = segment.blockOf(tile, 24);
       final start = segment.blockStart(tile, block);
       final end = segment.blockEnd(tile, block);
-      segment.bytes.fillRange(start, end - 4, 0xff);
+      segment.bytes.fillRange(start, end - 4, 0);
       segment.save(tile: tile, block: block);
 
       String decode(int leftover) {
